@@ -9,7 +9,7 @@ var args = minimist(process.argv.slice(2), {
   }
 })
 
-var DEFAULT_PORT = 25788
+var DEFAULT_PORT = 25778
 var host = args.host || '72.76.47.91';
 var port = Number(args.localport || DEFAULT_PORT);
 var remotePort = Number(args.remoteport || DEFAULT_PORT);
