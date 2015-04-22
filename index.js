@@ -20,8 +20,9 @@ var onclose = function() {
 
 function server(cb) {
   utp.createServer(function(socket) {
-    cb();
     console.log('new connection');
+    cb();
+
     socket.write('hello from server');
     socket.on('end', function() {
       socket.end();
@@ -37,8 +38,8 @@ function client(cb) {
   console.log('attempting to connect to', host + ':' + port);
   var socket = utp.connect(remotePort, host);
   socket.on('connect', function() {
-    cb();
     console.log('connected');
+    cb();
   });
 
   socket.on('close', onclose);
