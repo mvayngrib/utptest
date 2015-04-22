@@ -18,28 +18,36 @@ var onclose = function() {
   if (++closed === 2) process.exit(0);
 };
 
-utp.createServer(function(socket) {
-  console.log('new connection');
-  socket.write('hello from server');
-  socket.on('end', function() {
-    socket.end();
+function server(cb) {
+  utp.createServer(function(socket) {
+    cb();
+    console.log('new connection');
+    socket.write('hello from server');
+    socket.on('end', function() {
+      socket.end();
+    });
+    socket.on('close', onclose);
+    socket.on('data', function(e) {
+      console.log('Got data', e.toString());
+    });
+  }).listen(port);
+}
+
+function client(cb) {
+  console.log('attempting to connect to', host + ':' + port);
+  var socket = utp.connect(remotePort, host);
+  socket.on('connect', function() {
+    cb();
+    console.log('connected');
   });
+
   socket.on('close', onclose);
   socket.on('data', function(e) {
     console.log('Got data', e.toString());
   });
-}).listen(port);
 
-console.log('attempting to connect to', host + ':' + port);
-var socket = utp.connect(remotePort, host);
-socket.on('connect', function() {
-  console.log('connected');
-});
+  socket.write('hello from client');
+  socket.end();
+}
 
-socket.on('close', onclose);
-socket.on('data', function(e) {
-  console.log('Got data', e.toString());
-});
-
-socket.write('hello from client');
-socket.end();
+client(server)
