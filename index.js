@@ -9,9 +9,10 @@ var args = minimist(process.argv.slice(2), {
   }
 })
 
+var noop = function() {}
 var DEFAULT_PORT = 25778
 var host = args.host || '72.76.47.91';
-var port = Number(args.localport || DEFAULT_PORT);
+var localPort = Number(args.localport || DEFAULT_PORT);
 var remotePort = Number(args.remoteport || DEFAULT_PORT);
 var closed = 0;
 var onclose = function() {
@@ -19,36 +20,45 @@ var onclose = function() {
 };
 
 function server(cb) {
+  cb = cb || noop
   utp.createServer(function(socket) {
-    console.log('new connection');
-    cb();
+    console.log('incoming connection from', socket.host, socket.port);
+    remotePort = socket.port;
+    host = socket.host;
 
-    socket.write('hello from server');
-    socket.on('end', function() {
-      socket.end();
-    });
     socket.on('close', onclose);
     socket.on('data', function(e) {
-      console.log('Got data', e.toString());
+      console.log(e.toString());
     });
-  }).listen(port);
+
+    socket.write('hello from server');
+    cb();
+  }).listen(localPort);
 }
 
 function client(cb) {
-  console.log('attempting to connect to', host + ':' + port);
-  var socket = utp.connect(remotePort, host);
+  cb = cb || noop
+  var cOpts = {
+    port: remotePort,
+    host: host
+    // ,
+    // localPort: localPort
+  };
+
+  console.log('outgoing connection to', cOpts);
+  var socket = utp.connect(cOpts);
+
   socket.on('connect', function() {
-    console.log('connected');
+    localPort = this.socket.address().port;
     cb();
   });
-
   socket.on('close', onclose);
   socket.on('data', function(e) {
-    console.log('Got data', e.toString());
+    console.log(e.toString());
   });
 
   socket.write('hello from client');
-  socket.end();
+  // socket.end();
 }
 
-client(server)
+client(server);
