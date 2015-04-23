@@ -17,7 +17,7 @@ var remotePort = Number(args.remoteport || DEFAULT_PORT);
 
 var msg = new Buffer('hello from client');
 socket.bind(localPort, function() {
-  socket.send(msg, 0, msg.length, remoteHost, remotePort);
+  socket.send(msg, 0, msg.length, remotePort, remoteHost);
 });
 
 socket.on('message', function(m, rinfo) {

@@ -20,7 +20,7 @@ socket.bind(localPort);
 socket.on('message', function(m, rinfo) {
   var newSocket = dgram.createSocket('udp4');
   newSocket.bind(localPort, function() {
-    newSocket.send(msg, 0, msg.length, remoteHost, remotePort);
+    newSocket.send(msg, 0, msg.length, remotePort, remoteHost);
   })
 
   newSocket.on('message', function(m, rinfo) {
