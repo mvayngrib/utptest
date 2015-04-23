@@ -19,10 +19,10 @@ var onclose = function() {
   if (++closed === 2) process.exit(0);
 };
 
-function server(cb) {
+function startServer(cb) {
   cb = cb || noop
-  utp.createServer(function(socket) {
-    console.log('incoming connection from', socket.host, socket.port);
+  var server = utp.createServer(function(socket) {
+    console.log('incoming connection from', socket.host + ':' + socket.port);
     remotePort = socket.port;
     host = socket.host;
 
@@ -33,16 +33,17 @@ function server(cb) {
 
     socket.write('hello from server');
     cb();
-  }).listen(localPort);
+  });
+
+  server.listen(localPort);
 }
 
-function client(cb) {
+function startClient(cb) {
   cb = cb || noop
   var cOpts = {
     port: remotePort,
-    host: host
-    // ,
-    // localPort: localPort
+    host: host,
+    localPort: localPort
   };
 
   console.log('outgoing connection to', cOpts);
@@ -50,15 +51,15 @@ function client(cb) {
 
   socket.on('connect', function() {
     localPort = this.socket.address().port;
+    socket.write('hello from client');
     cb();
   });
+
   socket.on('close', onclose);
   socket.on('data', function(e) {
     console.log(e.toString());
   });
-
-  socket.write('hello from client');
   // socket.end();
 }
 
-client(server);
+startServer(startClient);
