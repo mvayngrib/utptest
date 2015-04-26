@@ -15,6 +15,7 @@ var host = args.host || '72.76.47.91';
 var localPort = Number(args.localport || DEFAULT_PORT);
 var remotePort = Number(args.remoteport || DEFAULT_PORT);
 
+console.log('localPort:', localPort, 'remoteHost:', host, 'remotePort:', remotePort);
 var s = dgram.createSocket('udp4')
 s.bind(localPort);
 var client = new rudp.Client(s, host, remotePort);
