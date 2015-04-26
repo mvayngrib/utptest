@@ -20,7 +20,7 @@ var s = dgram.createSocket('udp4')
 s.bind(localPort);
 var client = new rudp.Client(s, host, remotePort);
 
-client.on('message', function(data, rinfo) {
+client.on('data', function(data, rinfo) {
   console.log(arguments)
 })
 
