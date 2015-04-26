@@ -1,7 +1,9 @@
 
 var dgram = require('dgram');
-var socket = dgram.createSocket('udp4');
+var newSocket = require('./mksocket');
+var socket = newSocket();
 var minimist = require('minimist');
+var count = 0;
 var args = minimist(process.argv.slice(2), {
   alias: {
     h: 'host',
@@ -21,5 +23,7 @@ socket.bind(localPort, function() {
 });
 
 socket.on('message', function(m, rinfo) {
-  console.log('message', m.toString(), rinfo);
+  console.log('got message', m.toString());
+  m = new Buffer(m.toString() + (count++));
+  socket.send(m, 0, m.length, remotePort, remoteHost);
 })

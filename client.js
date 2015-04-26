@@ -1,4 +1,5 @@
 
+var dgram = require('dgram');
 var utp = require('utp');
 var minimist = require('minimist');
 var args = minimist(process.argv.slice(2), {
@@ -15,7 +16,9 @@ var host = args.host || '72.76.47.91';
 var localPort = Number(args.localport || DEFAULT_PORT);
 var remotePort = Number(args.remoteport || DEFAULT_PORT);
 var closed = 0;
+var count = 0;
 var onclose = function() {
+  debugger;
   if (++closed === 2) process.exit(0);
 };
 
@@ -28,7 +31,7 @@ function startServer(cb) {
 
     socket.on('close', onclose);
     socket.on('data', function(e) {
-      console.log(e.toString());
+      console.log('received', e.slice(20).toString());
     });
 
     socket.write('hello from server');
@@ -50,7 +53,7 @@ function startClient(cb) {
   var socket = utp.connect(cOpts);
   socket.on('connect', function() {
     localPort = this.socket.address().port;
-    socket.write('hello from client');
+    socket.write('hello from client: ' + (count++));
     cb();
   });
 
@@ -60,6 +63,20 @@ function startClient(cb) {
   });
 
   // socket.end();
+}
+
+var create = dgram.createSocket;
+dgram.createSocket = function() {
+  var s = create.apply(this, arguments);
+  ['bind', 'send', 'end'].forEach(function(method) {
+    var orig = s[method];
+    s[method] = function() {
+      console.log(method, arguments[0].toString());
+      return orig.apply(this, arguments);
+    }
+  })
+
+  return s;
 }
 
 startClient(startServer);

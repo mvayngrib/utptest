@@ -1,6 +1,6 @@
 
 var dgram = require('dgram');
-var socket = dgram.createSocket('udp4');
+var newSocket = require('./mksocket');
 var minimist = require('minimist');
 var args = minimist(process.argv.slice(2), {
   alias: {
@@ -16,14 +16,27 @@ var localPort = Number(args.localport || DEFAULT_PORT);
 var remotePort = Number(args.remoteport || DEFAULT_PORT);
 
 var msg = new Buffer('hello from server');
-socket.bind(localPort);
-socket.on('message', function(m, rinfo) {
-  var newSocket = dgram.createSocket('udp4');
-  newSocket.bind(localPort, function() {
-    newSocket.send(msg, 0, msg.length, remotePort, remoteHost);
-  })
 
-  newSocket.on('message', function(m, rinfo) {
-    console.log('message on new socket', m.toString(), rinfo);
-  })
-})
+function respawn() {
+  var socket = newSocket();
+  socket.bind(localPort);
+  socket.send(msg, 0, msg.length, remotePort, remoteHost);
+  socket.on('message', function(m, rinfo) {
+    console.log('message', m.toString(), rinfo);
+    socket.close();
+    setTimeout(respawn, 3000);
+
+    // setTimeout(function() {
+    //   var anotherSocket = newSocket();
+    //   anotherSocket.bind(localPort, function() {
+    //     anotherSocket.send(msg, 0, msg.length, remotePort, remoteHost);
+    //   })
+
+    //   anotherSocket.on('message', function(m, rinfo) {
+    //     console.log('message on new socket', m.toString(), rinfo);
+    //   })
+    // }, 2000);
+  });
+}
+
+respawn();

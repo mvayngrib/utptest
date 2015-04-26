@@ -1,6 +1,7 @@
 
 var utp = require('utp');
 var minimist = require('minimist');
+var loggy = require('./loggy');
 var args = minimist(process.argv.slice(2), {
   alias: {
     h: 'host',
@@ -27,9 +28,9 @@ function startServer(cb) {
     host = socket.host;
 
     socket.on('close', onclose);
-    socket.on('data', function(e) {
-      console.log(e.toString());
-    });
+    // socket.on('data', function(e) {
+      // console.log(e.slice(20).toString());
+    // });
 
     socket.write('hello from server');
     cb();
@@ -50,6 +51,7 @@ function startClient(cb) {
   var socket = utp.connect(cOpts);
 
   socket.on('connect', function() {
+    console.log(this.socket.address());
     localPort = this.socket.address().port;
     socket.write('hello from client');
     cb();

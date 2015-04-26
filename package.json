@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "minimist": "^1.1.1",
+    "rudp": "^1.0.0-alpha4",
     "utp": "git://github.com/mvayngrib/utp#dev"
   }
 }
